@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  relay:
+    image: nullusionist/nova-tor-relay:latest
+    container_name: nova-relay
+    ports:
+      - "9001:9001"   # ORPort
+      - "9030:9030"   # DirPort
+      - "9051:9051"   # ControlPort
+    volumes:
+      - tor-data:/var/lib/tor
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      CONTACT: contact@nullusionist.dev
+      BANDWIDTH_LIMIT_MBPS: 200
+      BANDWIDTH_BURST_MBPS: 400
+      # NICKNAME: NovaRelayCustom
+      # OR_PORT: 9001
+      # DIR_PORT: 9030
+      # CONTROL_PORT: 0.0.0.0:9051
+      # EXIT_RELAY: 1
+      # EXIT_POLICY: accept 80,443
+      # ACCOUNTING_START: "day 1 00:00"
+      # ACCOUNTING_MAX: 5 GB
+      # TOR_EXTRA_LINES: |
+      #   MyFamily $FINGERPRINT1,$FINGERPRINT2
+      #   Log notice stdout
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --label-enable --cleanup --interval 300
+
+volumes:
+  tor-data:

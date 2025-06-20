@@ -1,0 +1,33 @@
+## Identification
+Nickname ${NICKNAME}
+ContactInfo ${CONTACT}
+
+## Relay Ports
+ORPort ${OR_PORT}
+DirPort ${DIR_PORT}
+Address ${ADDRESS}
+
+## Relay Type
+ExitRelay ${EXIT_RELAY}
+SocksPort ${SOCKS_PORT}
+
+## Control Port
+ControlPort ${CONTROL_PORT}
+CookieAuthentication ${COOKIE_AUTH}
+
+## Bandwidth Limits
+RelayBandwidthRate ${BANDWIDTH_LIMIT}
+RelayBandwidthBurst ${BANDWIDTH_BURST}
+
+## Optional Data Cap
+${ACCOUNTING_BLOCK}
+
+## Performance & Stability
+AvoidDiskWrites 1
+DirCache 1
+
+## Storage
+DataDirectory /var/lib/tor
+
+## Extra Options (Optional, from ENV)
+${TOR_EXTRA_LINES}
