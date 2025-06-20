@@ -9,11 +9,11 @@ mirror:
     - git remote add gitlab https://oauth2:${MIRROR_GITLAB_TOKEN}@gitlab.com/nullusionist/nova-tor-relay.git
     - git remote add codeberg https://${MIRROR_CODEBERG_TOKEN}@codeberg.org/nullusionist/nova-tor-relay.git
     - git branch -f main origin/main
-    - git push --force github main
+    - git push github main
     - git push github --tags
-    - git push --force codeberg main
+    - git push codeberg main
     - git push codeberg --tags
-    - git push --force gitlab main
+    - git push gitlab main
     - git push gitlab --tags --prune
   only:
     - main
