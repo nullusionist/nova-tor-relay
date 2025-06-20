@@ -1,5 +1,14 @@
 # 📦 Changelog
 
+## [v1.0.2] - 2025-06-20
+
+- Updated CI to trigger mirror job on tag creation (`CI_COMMIT_TAG`)
+- Ensures all future tags like `v1.x.y` auto-sync to:
+  - GitHub
+  - GitLab.com
+  - Codeberg
+- Tag-only pushes now work without requiring a branch commit
+
 ## [v1.0.1] - 2025-06-20
 
 - Added `CHANGELOG.md`
