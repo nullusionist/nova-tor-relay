@@ -15,8 +15,8 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
       CONTACT: contact@nullusionist.dev
-      BANDWIDTH_LIMIT_MBPS: 200
-      BANDWIDTH_BURST_MBPS: 400
+      BANDWIDTH_LIMIT: 100 KB
+      BANDWIDTH_BURST: 200 KB
       # NICKNAME: NovaRelayCustom
       # OR_PORT: 9001
       # DIR_PORT: 9030
