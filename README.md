@@ -6,51 +6,62 @@
 - [![Mirror: GitLab](https://img.shields.io/badge/mirror-gitlab-orange?logo=gitlab)](https://gitlab.com/nullusionist/nova-tor-relay)
 - [![Mirror: Codeberg](https://img.shields.io/badge/mirror-codeberg-lightblue?logo=codeberg)](https://codeberg.org/nullusionist/nova-tor-relay)
 
-Nova Tor Relay is a minimal, opinionated Docker image for running a secure Tor **relay** with simple configuration via environment variables and Compose.  
+Nova Tor Relay is a minimal, opinionated Docker image for running a secure Tor **relay** with simple configuration via environment variables or Compose.  
 Image: **`nullusionist/nova-tor-relay`**
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (clean & ordered)
 
-Using Docker:
+### 1) Create your `.env`
+Copy the example and edit values to taste.
 ```bash
-docker run -d   --name nova-tor-relay   -p 9001:9001 \        # ORPort
-  -p 9030:9030 \        # DirPort (optional)
-  -e CONTACT="you@example.com"   -e BANDWIDTH_LIMIT="100 KB"   -e BANDWIDTH_BURST="200 KB"   -v nova-tor-data:/var/lib/tor   nullusionist/nova-tor-relay:latest
+cp .env.example .env
+# then edit .env
 ```
 
-Using Compose:
+Typical keys in `.env`:
+```env
+CONTACT=you@example.com
+BANDWIDTH_LIMIT=100 KB
+BANDWIDTH_BURST=200 KB
+# NICKNAME=MyRelay
+# EXIT_RELAY=0
+# EXIT_POLICY=accept 80,443
+# ACCOUNTING_START=day 1 00:00
+# ACCOUNTING_MAX=5 GB
+# TOR_EXTRA_LINES=Log notice stdout\nMyFamily ABC123,DEF456
+```
+
+> **Ports:** expose **9001/tcp** (ORPort) and optionally **9030/tcp** (DirPort).  
+> **State:** persist `/var/lib/tor` to keep your relay identity across restarts.
+
+---
+
+### 2A) Start with **Compose** (recommended)
+Compose auto-loads `.env` from the project directory.
 ```bash
 docker compose up -d
 ```
-> Forward ports **9001** (ORPort) and **9030** (DirPort) from your router/firewall to this host.
 
-On first start the container will:
-- Detect public IP
-- Generate/persist a nickname (if none set)
-- Apply bandwidth limits
-- Register with the Tor network
+### 2B) Or start with the **Docker CLI** (one‑liner + overrides)
+Load baseline values from `.env` and optionally override inline:
+```bash
+docker run -d --name nova-tor-relay   --env-file .env   -e CONTACT="you@example.com"   -e BANDWIDTH_LIMIT="100 KB"   -e BANDWIDTH_BURST="200 KB"   -p 9001:9001   -p 9030:9030   -v nova-tor-data:/var/lib/tor   nullusionist/nova-tor-relay:latest
+```
+
+**Verify it’s up:**
+```bash
+docker logs -f --tail 200 nova-tor-relay
+# When bootstrapped, the relay will appear on:
+# https://metrics.torproject.org/rs.html#search/
+```
 
 ---
 
 ## ⚙️ Configuration
 
-All settings are driven by environment variables (see `.env.example`). Common overrides:
-
-```env
-CONTACT=your@email.com
-BANDWIDTH_LIMIT=100 KB
-BANDWIDTH_BURST=200 KB
-# NICKNAME=MyRelay
-# EXIT_RELAY=1
-# EXIT_POLICY=accept 80,443
-# ACCOUNTING_START=day 1 00:00
-# ACCOUNTING_MAX=5 GB
-
-# Multiline extras (escaped newlines):
-# TOR_EXTRA_LINES=Log notice stdout\nMyFamily ABC123,DEF456
-```
+All settings are driven by environment variables (see `.env.example`).
 
 **Volumes**
 - `/var/lib/tor` — persist identity/keys
@@ -70,7 +81,7 @@ This project publishes **multi‑arch** images for `linux/amd64` and `linux/arm6
 - `latest` → current release (**multi‑arch manifest**)
 - `X.Y.Z` → pinned Tor version (multi‑arch), e.g. `0.4.8.17`
 - `X.Y.Z-<codename>` → Tor version + Debian codename (multi‑arch), e.g. `0.4.8.17-trixie`
-- `latest-amd64`, `latest-arm64` → arch‑specific images (used to build the manifest)
+- `latest-amd64`, `latest-arm64` → arch‑specific images (feed the multi‑arch `latest`)
 - `X.Y.Z-amd64`, `X.Y.Z-arm64` and `X.Y.Z-<codename>-amd64`, `…-arm64` → arch‑specific pins
 
 **Examples**
@@ -87,6 +98,12 @@ docker pull nullusionist/nova-tor-relay:0.4.8.17-trixie
 # Force an explicit platform
 docker pull --platform=linux/amd64 nullusionist/nova-tor-relay:latest
 docker pull --platform=linux/arm64 nullusionist/nova-tor-relay:latest
+```
+
+**Verify multi‑arch**
+```bash
+docker buildx imagetools inspect nullusionist/nova-tor-relay:latest
+# should list both linux/amd64 and linux/arm64
 ```
 
 ---
