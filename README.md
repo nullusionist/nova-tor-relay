@@ -148,8 +148,6 @@ Internal helper scripts live under `scripts/` (not required for users).
 - GitLab: https://gitlab.com/nullusionist/nova-tor-relay  
 - Codeberg: https://codeberg.org/nullusionist/nova-tor-relay
 
-Primary source: https://git.nullusionist.dev/infra/nova-tor-relay
-
 ---
 
 ## 📄 License
