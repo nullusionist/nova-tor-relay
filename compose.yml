@@ -12,30 +12,29 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
-      CONTACT: contact@nullusionist.dev
-      BANDWIDTH_LIMIT: 100 KB
-      BANDWIDTH_BURST: 200 KB
-      # NICKNAME: NovaRelayCustom
-      # OR_PORT: 9001
-      # DIR_PORT: 9030
-      # CONTROL_PORT: 0.0.0.0:9051
-      # EXIT_RELAY: 1
-      # EXIT_POLICY: accept 80,443
-      # ACCOUNTING_START: "day 1 00:00"
-      # ACCOUNTING_MAX: 5 GB
-      # TOR_EXTRA_LINES: |
-      #   MyFamily $FINGERPRINT1,$FINGERPRINT2
-      #   Log notice stdout
+      CONTACT: ${CONTACT}
+      BANDWIDTH_LIMIT: ${BANDWIDTH_LIMIT:-100 KB}
+      BANDWIDTH_BURST: ${BANDWIDTH_BURST:-200 KB}
+      NICKNAME: ${NICKNAME:-}
+      OR_PORT: ${OR_PORT:-9001}
+      DIR_PORT: ${DIR_PORT:-9030}
+      CONTROL_PORT: ${CONTROL_PORT:-}
+      EXIT_RELAY: ${EXIT_RELAY:-0}
+      EXIT_POLICY: ${EXIT_POLICY:-}
+      ACCOUNTING_START: ${ACCOUNTING_START:-}
+      ACCOUNTING_MAX: ${ACCOUNTING_MAX:-}
+      TOR_EXTRA_LINES: ${TOR_EXTRA_LINES:-}
 
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --label-enable --cleanup --interval 300
+# Optional self-updating Watchtower for automatic updates
+#  watchtower:
+#    image: containrrr/watchtower
+#    container_name: watchtower
+#    restart: unless-stopped
+#    labels:
+#      - "com.centurylinklabs.watchtower.enable=true"
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    command: --label-enable --cleanup --interval 300
 
 volumes:
   tor-data:

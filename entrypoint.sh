@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 DATA_DIR=/var/lib/tor
@@ -12,9 +12,12 @@ fi
 
 echo "🌍 Detected public IP: $PUBLIC_IP"
 
-if [ -n "$NICKNAME" ]; then
+# ---- Nickname handling (prefix-stable if NICKNAME provided) ----
+if [ -n "${NICKNAME:-}" ]; then
   if [ -f "$NICKNAME_FILE" ]; then
     EXISTING_NICKNAME=$(cat "$NICKNAME_FILE")
+    # NOTE: ${var:offset:length} is non-POSIX; used only if NICKNAME is set.
+    # If your /bin/sh doesn't support it, consider switching shebang to /bin/bash.
     EXISTING_PREFIX="${EXISTING_NICKNAME:0:${#NICKNAME}}"
   else
     EXISTING_NICKNAME=""
@@ -46,9 +49,20 @@ else
   echo "🆕 Generated default relay nickname: $RELAY_NICKNAME"
 fi
 
-CONTACT_EMAIL="${CONTACT:-contact@nullusionist.dev}"
+# ---- CONTACT validation (required; must not be the placeholder) ----
+CONTACT_RAW="${CONTACT:-}"
+DEFAULT_PLACEHOLDER="your@email.com"
 
-if [ -n "$ACCOUNTING_START" ] && [ -n "$ACCOUNTING_MAX" ]; then
+if [ -z "$CONTACT_RAW" ] || [ "$CONTACT_RAW" = "$DEFAULT_PLACEHOLDER" ]; then
+  echo "❌ CONTACT is required and cannot be '$DEFAULT_PLACEHOLDER'."
+  echo "   Please set CONTACT in your environment or .env (e.g., CONTACT=you@example.com)."
+  exit 1
+fi
+
+CONTACT_EMAIL="$CONTACT_RAW"
+
+# ---- Optional blocks ----
+if [ -n "${ACCOUNTING_START:-}" ] && [ -n "${ACCOUNTING_MAX:-}" ]; then
   ACCOUNTING_BLOCK="\
 AccountingStart $ACCOUNTING_START
 AccountingMax $ACCOUNTING_MAX"
@@ -56,12 +70,13 @@ else
   ACCOUNTING_BLOCK=""
 fi
 
-if [ -n "$CONTROL_PORT" ]; then
+if [ -n "${CONTROL_PORT:-}" ]; then
   CONTROL_PORT_BLOCK="ControlPort $CONTROL_PORT\\nCookieAuthentication ${COOKIE_AUTH:-1}"
 else
   CONTROL_PORT_BLOCK=""
 fi
 
+# ---- Export for envsubst / torrc template ----
 export ADDRESS="$PUBLIC_IP"
 export NICKNAME="$RELAY_NICKNAME"
 export CONTACT="$CONTACT_EMAIL"
@@ -80,6 +95,7 @@ if [ $? -ne 0 ]; then
   echo "❌ Failed to generate torrc configuration!"
   exit 1
 fi
+
 echo "🚀 Tor relay is starting with the following configuration:"
 echo "  - Public IP: $PUBLIC_IP"
 echo "  - Relay Nickname: $RELAY_NICKNAME"
@@ -90,11 +106,20 @@ echo "  - OR Port: $OR_PORT"
 echo "  - Directory Port: $DIR_PORT"
 echo "  - Exit Relay: $EXIT_RELAY"
 echo "  - SOCKS Port: $SOCKS_PORT"
-echo "  - Control Port: ${CONTROL_PORT:-disabled}"
-echo "  - Cookie Auth: ${COOKIE_AUTH:-n/a}"
+if [ -n "${CONTROL_PORT:-}" ]; then
+  echo "  - Control Port: $CONTROL_PORT"
+  echo "  - Cookie Auth: ${COOKIE_AUTH:-1}"
+else
+  echo "  - Control Port: disabled"
+  echo "  - Cookie Auth: n/a"
+fi
 echo "  - Extra Tor Lines: $TOR_EXTRA_LINES"
+
 echo "✅ Tor relay configuration complete. Starting relay..."
 echo "Please wait while the Tor relay starts up..."
+
 exec su -s /bin/sh tor -c "tor -f /etc/tor/torrc"
+
+# If exec fails (it shouldn't), this would run; keep for completeness.
 sleep 5
-echo "🎉 Tor relay is now running!
+echo "🎉 Tor relay is now running!"
