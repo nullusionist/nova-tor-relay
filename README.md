@@ -9,8 +9,6 @@
 Nova Tor Relay is a minimal, opinionated Docker image for running a secure Tor **relay** with simple configuration via environment variables and Compose.  
 Image: **`nullusionist/nova-tor-relay`**
 
-This README is suitable for both the **Docker Hub repo page** and the **source repo**.
-
 ---
 
 ## 🚀 Quick Start
