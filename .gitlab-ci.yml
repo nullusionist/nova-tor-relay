@@ -1,20 +1,64 @@
+# .gitlab-ci.yml — EXACT mirror of upstream (origin) to GitHub/GitLab.com/Codeberg
+stages: [deploy]
+
+variables:
+  GIT_STRATEGY: fetch
+  GIT_DEPTH: "0"
+
 mirror:
   stage: deploy
-  image: alpine:latest
-  script:
-    - apk add --no-cache git
-    - git config --global user.email "mirror@nullusionist.dev"
-    - git config --global user.name "Nova Mirror Bot"
-    - git remote add github https://${MIRROR_GITHUB_TOKEN}@github.com/nullusionist/nova-tor-relay.git
-    - git remote add gitlab https://oauth2:${MIRROR_GITLAB_TOKEN}@gitlab.com/nullusionist/nova-tor-relay.git
-    - git remote add codeberg https://${MIRROR_CODEBERG_TOKEN}@codeberg.org/nullusionist/nova-tor-relay.git
-    - git branch -f main origin/main
-    - git push github main
-    - git push github --tags
-    - git push codeberg main
-    - git push codeberg --tags
-    - git push gitlab main
-    - git push gitlab --tags --prune
+  image: alpine:3.22
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_TAG'
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.email "mirror@nullusionist.dev"
+    - git config --global user.name  "Nova Mirror Bot"
+    - git config --global safe.directory "$CI_PROJECT_DIR"
+
+    - git remote remove github  2>/dev/null || true
+    - git remote remove gitlab  2>/dev/null || true
+    - git remote remove codeberg 2>/dev/null || true
+    - git remote add github  "https://${MIRROR_GITHUB_TOKEN}@github.com/nullusionist/nova-tor-relay.git"
+    - git remote add gitlab  "https://oauth2:${MIRROR_GITLAB_TOKEN}@gitlab.com/nullusionist/nova-tor-relay.git"
+    - git remote add codeberg "https://${MIRROR_CODEBERG_TOKEN}@codeberg.org/nullusionist/nova-tor-relay.git"
+
+    - git fetch origin --prune --tags
+    - git checkout -B main origin/main
+
+    # Upstream tag list (names only)
+    - git for-each-ref refs/tags --format='%(refname:strip=2)' | sort -u > /tmp/tags.origin
+
+  script:
+    - |
+      set -e
+
+      sync_remote() {
+        R="$1"
+        echo "==> Syncing $R"
+
+        # Mirror's current tags (names only). Ensure file exists even if no tags.
+        git ls-remote --tags --refs "$R" \
+          | awk '{print $2}' \
+          | sed 's@^refs/tags/@@' \
+          | sort -u > /tmp/tags.mirror || true
+        touch /tmp/tags.mirror
+
+        # 1) Force-update main to match origin/main and prune remote branches
+        git push --force --prune "$R" main:main
+
+        # 2) Force-update ALL tags to upstream values
+        git push --force "$R" 'refs/tags/*:refs/tags/*'
+
+        # 3) Delete tags present on mirror but not upstream (comm exits 0 even if empty)
+        comm -23 /tmp/tags.mirror /tmp/tags.origin | while read -r T; do
+          [ -n "$T" ] && git push "$R" ":refs/tags/$T" || true
+        done
+
+        echo "==> $R done."
+      }
+
+      sync_remote github
+      sync_remote gitlab
+      sync_remote codeberg

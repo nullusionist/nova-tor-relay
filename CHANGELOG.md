@@ -2,6 +2,20 @@
 
 All notable changes to **Nova Tor Relay** are documented here.
 
+## [v1.1.1] - 2025-09-05
+
+### CI/CD
+- Mirrors now perform **source-of-truth syncs**:
+  - **`git push --mirror`** on branch pipelines so GitHub/GitLab/Codeberg exactly match upstream (branches **and** tags, including deletes and rewrites).
+  - Tag-only pipelines push **just the triggering tag** (no branch changes).
+- Fetch full history (`GIT_DEPTH=0`) and set `safe.directory` for the runner.
+- Requires mirror permissions to allow **force-push** on `main` and **tag deletes/moves**.
+
+### Fixed
+- Eliminates non-fast-forward/tag-clobber errors; mirrors now stay byte-for-byte aligned with upstream.
+
+> No image/content changes in this release; CI only.
+
 ## [v1.1.0] - 2025-09-05
 
 ### Added
