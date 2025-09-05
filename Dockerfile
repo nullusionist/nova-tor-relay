@@ -1,20 +1,16 @@
 FROM debian:stable-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
-
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get install -y \
-      wget gnupg2 lsb-release apt-transport-https \
-      ca-certificates curl gettext && \
-    wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc \
-    | gpg --dearmor \
-    | tee /usr/share/keyrings/tor-archive-keyring.gpg > /dev/null && \
+    apt-get -yq install --no-install-recommends \
+      wget gnupg2 lsb-release apt-transport-https ca-certificates curl && \
+    curl -fsSL https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc \
+      | gpg --dearmor > /usr/share/keyrings/tor-archive-keyring.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org $(lsb_release -cs) main" \
-    > /etc/apt/sources.list.d/tor.list && \
+      > /etc/apt/sources.list.d/tor.list && \
     apt-get update && \
-    apt-get install -y tor deb.torproject.org-keyring && \
+    apt-get -yq install --no-install-recommends tor deb.torproject.org-keyring && \
     rm -rf /var/lib/apt/lists/*
-
 RUN adduser --system --group tor
 
 COPY torrc.template /etc/tor/torrc.template

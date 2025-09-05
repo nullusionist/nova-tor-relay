@@ -2,6 +2,11 @@
 
 All notable changes to **Nova Tor Relay** are documented here.
 
+## [v1.1.2] - 2025-09-05
+
+### Image 
+- Slimmer image builds with --no-install-recommends
+
 ## [v1.1.1] - 2025-09-05
 
 ### CI/CD
