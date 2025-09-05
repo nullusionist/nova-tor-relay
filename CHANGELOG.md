@@ -2,6 +2,20 @@
 
 All notable changes to **Nova Tor Relay** are documented here.
 
+## [v1.1.1] - 2025-09-05
+
+### CI/CD
+- Hardened mirror workflow:
+  - Split **branch** and **tag** mirroring into separate jobs.
+  - Use **--force-with-lease** (lease-protected) for `main` updates after rewrites.
+  - **Prune** stale refs on mirrors; avoid pushing `main` during tag-only pipelines.
+  - Fetch full history (`GIT_DEPTH=0`) and set `safe.directory` for the runner.
+
+### Fixed
+- Resolved non-fast-forward push failures on mirrors; GitHub/GitLab/Codeberg now consistently mirror the source-of-truth `main` and tags.
+
+> No image/content changes in this release; CI only.
+
 ## [v1.1.0] - 2025-09-05
 
 ### Added
