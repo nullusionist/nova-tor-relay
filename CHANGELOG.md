@@ -1,5 +1,38 @@
 # 📦 Changelog
 
+All notable changes to **Nova Tor Relay** are documented here.
+
+## [v1.1.0] - 2025-09-05
+
+### Added
+- **Multi-arch distribution**: `latest`, `X.Y.Z`, and `X.Y.Z-<codename>` are now **manifest lists** that select `linux/amd64` or `linux/arm64` automatically.
+- Arch-specific images are published as `*-amd64` and `*-arm64` and then assembled into multi-arch tags.
+
+### Changed
+- **Compose** now references env values (e.g., `CONTACT`, `BANDWIDTH_LIMIT`, etc.).
+- **Environment defaults** refined in `entrypoint.sh`; stronger validation of `CONTACT` and saner bandwidth defaults.
+- Docs: multiple README passes to reflect Compose + env model, tag strategy, and quick-start flow.
+
+### Fixed
+- Bandwidth defaults and examples (`BANDWIDTH_LIMIT`, `BANDWIDTH_BURST`) corrected and clarified.
+
+### CI/CD
+- New **autobuild** flow (separate repo) that detects Tor releases, Docker base updates, or upstream `main` changes and rebuilds/pushes:
+  - Builds **per-arch images** and then **re-tags multi-arch** `latest`, version, and codename tags.
+  - Ensures `latest` manifest points to the newest arch images (no stale references).
+
+### Upgrade notes
+- If you previously pinned `latest-amd64` or `latest-arm64`, you may now safely use `latest` (multi-arch).  
+- If you run Watchtower, keep the label `com.centurylinklabs.watchtower.enable=true` on the `relay` service.
+- The Compose file now **references .env for config values**. Copy your `.env` into place and edit (CONTACT must be updated):
+  ```bash
+  cp .env.example .env
+  nano .env
+  docker compose up -d
+  ```
+
+---
+
 ## [v1.0.2] - 2025-06-20
 
 - Updated CI to trigger mirror job on tag creation (`CI_COMMIT_TAG`)
