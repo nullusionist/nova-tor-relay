@@ -10,7 +10,11 @@ RUN apt-get update && \
       > /etc/apt/sources.list.d/tor.list && \
     apt-get update && \
     apt-get -yq install --no-install-recommends tor deb.torproject.org-keyring && \
+    # --- prune unused packages to remove CVEs ---
+    apt-get purge -y libxml2 tar || true && \
+    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
+
 RUN adduser --system --group tor
 
 COPY torrc.template /etc/tor/torrc.template
