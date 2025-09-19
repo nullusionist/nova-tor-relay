@@ -3,8 +3,8 @@ Nickname ${NICKNAME}
 ContactInfo ${CONTACT}
 
 ## Relay Ports
-ORPort ${OR_PORT}
-DirPort ${DIR_PORT}
+${PORT_BLOCK}
+
 Address ${ADDRESS}
 
 ## Relay Type
@@ -12,8 +12,7 @@ ExitRelay ${EXIT_RELAY}
 SocksPort ${SOCKS_PORT}
 
 ## Control Port
-ControlPort ${CONTROL_PORT}
-CookieAuthentication ${COOKIE_AUTH}
+${CONTROL_PORT_BLOCK}
 
 ## Bandwidth Limits
 RelayBandwidthRate ${BANDWIDTH_LIMIT}
